@@ -25,18 +25,29 @@ func main() {
 		log.Fatal("No string")
 	}
 
-	fileName, url := getComic()
+	lunch, LUrl := getComic("lunch")
+	dilbert, DUrl := getComic("dilbert")
 
-	err1 := SendSlackNotification(webHookUrl, "Dagens Lunch "+url)
-	if err1 != nil {
-		log.Fatal(err1)
+	LNotErr := SendSlackNotification(webHookUrl, "Dagens Lunch "+LUrl)
+	if LNotErr != nil {
+		log.Fatal(LNotErr)
 	}
 
-	err2 := downloadFile(url, fileName)
-	if err2 != nil {
-		log.Fatal(err2)
+	DNotErr := SendSlackNotification(webHookUrl, "Dagens Dilbert "+DUrl)
+	if DNotErr != nil {
+		log.Fatal(DNotErr)
 	}
-	fmt.Printf("File %s downloaded in current working directory", fileName)
+
+	LFileErr := downloadFile(LUrl, lunch)
+	if LFileErr != nil {
+		log.Fatal(LFileErr)
+	}
+
+	DFileErr := downloadFile(DUrl, dilbert)
+	if DFileErr != nil {
+		log.Fatal(DFileErr)
+	}
+
 }
 
 func getEnvironment(varName string) (string, bool) {
@@ -47,15 +58,6 @@ func getEnvironment(varName string) (string, bool) {
 	}
 
 	return os.LookupEnv(varName)
-}
-
-func HowToSendSlackNotification() {
-	webHookUrl, _ := getEnvironment("WEBHOOK_URL")
-	_, url := getComic()
-	err := SendSlackNotification(webHookUrl, "Dagens Lunch "+url)
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 func SendSlackNotification(webhookUrl string, msg string) error {
@@ -82,10 +84,17 @@ func SendSlackNotification(webhookUrl string, msg string) error {
 	return nil
 }
 
-func getComic() (string, string) {
+func getComic(comic string) (string, string) {
 	baseUrl := "https://tu.no"
 	date := time.Now().Format("2006-01-02")
-	comicId := "lunch"
+
+	var comicId string
+	if comic == "lunch" || comic == "dilbert" {
+		comicId = comic
+	} else {
+		comicId = "unknown"
+	}
+
 	fileName := "tu-" + comicId + "-" + date + ".jpg"
 	URL := baseUrl + "/?module=TekComics&service=image&id=" + comicId + "&key=" + date
 	// URL looks like this https://www.tu.no/?module=TekComics&service=image&id=lunch&key=2020-05-28
@@ -117,6 +126,6 @@ func downloadFile(URL, fileName string) error {
 	if err != nil {
 		return err
 	}
-
+	fmt.Printf("File %s downloaded in current working directory\n", fileName)
 	return nil
 }
