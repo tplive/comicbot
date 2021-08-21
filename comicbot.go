@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -113,7 +114,8 @@ func downloadFile(URL, fileName string) error {
 	defer response.Body.Close()
 
 	if response.StatusCode != 200 {
-		return errors.New("Received non 200 response code")
+		return errors.New("Received non 200 response code: " + strconv.Itoa(response.StatusCode))
+
 	}
 
 	// Create an empty file
