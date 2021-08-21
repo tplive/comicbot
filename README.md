@@ -1,6 +1,8 @@
-# Lunchbot!
+# Comicbot!
 
 Go program that goes out to the [Teknisk Ukeblad web](https://tu.no) and downloads todays Lunch and Dilbert cartoons, then sends the URL to your Slack channel. The cartoons are in Norwegian.
+
+Could evolve to get other comics as well? :)
 
 The original idea is mine, but I have used various resources in implementing the solution. Learning Go along the way.
 
