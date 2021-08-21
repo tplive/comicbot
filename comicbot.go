@@ -20,8 +20,8 @@ type SlackRequestBody struct {
 
 func main() {
 
-	webHookUrl, ok := getEnvironment("WEBHOOK_URL")
-	if !ok {
+	webHookUrl := getEnvironment("WEBHOOK_URL")
+	if webHookUrl == "" {
 		log.Fatal("No string")
 	}
 
@@ -50,14 +50,16 @@ func main() {
 
 }
 
-func getEnvironment(varName string) (string, bool) {
+func getEnvironment(varName string) string {
 
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatalf("Error loading .env file")
+	godotenv.Load(".env")
+
+	value, isSet := os.LookupEnv(varName)
+
+	if !isSet || value == "" {
+		log.Print("Must set environment variable " + varName)
 	}
-
-	return os.LookupEnv(varName)
+	return value
 }
 
 func SendSlackNotification(webhookUrl string, msg string) error {
