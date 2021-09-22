@@ -24,5 +24,5 @@ This will download todays cartoon, if there is one, or fail gracefully otherwise
 
 ## Building and running with Docker
 
-1. Build the image `docker build --tag lunchbot .`
-1. Run the container `docker run --env WEBHOOK_URL="<your-slack-webhook-url>" lunchbot`
+1. Build the image `docker build --tag comicbot .`
+1. Run the container `docker run --env WEBHOOK_URL="<your-slack-webhook-url>" comicbot`
