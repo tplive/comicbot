@@ -1,0 +1,23 @@
+name: "Comicbot prod"
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 7 * * 1-5'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.18
+      env:
+        WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+
+    - name: Run
+      run: go run comicbot.go

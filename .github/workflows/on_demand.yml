@@ -1,0 +1,25 @@
+name: "Comicbot test"
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: dev
+    env:
+      WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.18
+
+    - name: Run
+      run: go run comicbot.go

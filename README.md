@@ -18,7 +18,7 @@ You should probably avoid spamming the tu.no website, as they might react with b
 WEBHOOK_URL="https://hooks.slack.com/services/THIS/IS/PRIVATE"
 ```
 
-3. Run the bot with `go run lunchbot.go`
+3. Run the bot with `go run comicbot.go`
 
 This will download todays cartoon, if there is one, or fail gracefully otherwise.
 
