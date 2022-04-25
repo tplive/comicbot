@@ -3,7 +3,7 @@ name: "Comicbot prod"
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 7 * * 1-5'
+    - cron: '0 5 * * 1-5'
 
 jobs:
   build:
