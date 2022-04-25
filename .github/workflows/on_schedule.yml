@@ -16,11 +16,8 @@ jobs:
       uses: actions/setup-go@v3
       with:
         go-version: 1.18
-
-    - name: Build
-      run: go build -v ./comicbot.go
+      env:
+        WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
 
     - name: Run
-      run: |
-        export WEBHOOK_URL=${{ secrets.WEBHOOK_URL }}
-        go run comicbot.go
+      run: go run comicbot.go
