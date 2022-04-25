@@ -1,4 +1,4 @@
-name: Go
+name: "Comicbot test"
 
 on:
   workflow_dispatch:

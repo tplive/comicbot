@@ -1,4 +1,4 @@
-name: Go
+name: "Comicbot prod"
 
 on:
   workflow_dispatch:
@@ -6,7 +6,6 @@ on:
     - cron: '0 7 * * 1-5'
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     environment: prod
