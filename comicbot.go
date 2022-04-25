@@ -82,7 +82,7 @@ func SendSlackNotification(webhookUrl string, msg string) error {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(resp.Body)
 	if buf.String() != "ok" {
-		return errors.New("Non-ok repsonse returned from Slack")
+		return errors.New("Non-ok response returned from Slack")
 	}
 	return nil
 }
