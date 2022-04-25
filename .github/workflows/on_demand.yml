@@ -25,4 +25,4 @@ jobs:
       run: go build -v ./comicbot.go
 
     - name: Run
-      run: go run comicbot.go
+      run: echo $WEBHOOK_URL # go run comicbot.go
