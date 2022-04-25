@@ -2,7 +2,7 @@ name: "Comicbot test"
 
 on:
   workflow_dispatch:
-    branches [ develop ]
+    branches: [ develop ]
 
 jobs:
   build:
