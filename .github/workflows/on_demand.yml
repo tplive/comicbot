@@ -3,6 +3,10 @@ name: "Comicbot test"
 on:
   workflow_dispatch:
     branches: [ develop ]
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
 
 jobs:
   build:
