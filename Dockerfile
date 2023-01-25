@@ -14,12 +14,10 @@ RUN go build -o /comicbot
 
 ### Deploy
 
-FROM gcr.io/distroless/base-debian10
+FROM alpine
 
 WORKDIR /
 
 COPY --from=build /comicbot /comicbot
-
-USER nonroot:nonroot
 
 ENTRYPOINT ["/comicbot"]
