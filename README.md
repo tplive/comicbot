@@ -12,7 +12,7 @@ You should probably avoid spamming the tu.no website, as they might react with b
 
 1. Get your Slack Incoming Webhook URL set up.
 1. Install Golang
-1. Set environment variable as below, or in a .env file for automatic inclusion:
+1. Set environment variable as below, or in a `.env` file for automatic inclusion:
 
 ```bash
 WEBHOOK_URL="https://hooks.slack.com/services/THIS/IS/PRIVATE"
@@ -26,3 +26,10 @@ This will download todays cartoon, if there is one, or fail gracefully otherwise
 
 1. Build the image `docker build --tag comicbot .`
 1. Run the container `docker run --env WEBHOOK_URL="<your-slack-webhook-url>" comicbot`
+
+## Building and publishing to Dockerhub
+
+First login to Dockerhub with `docker login`
+
+1. Build the image and tag appropriately `docker build --tag <repository>/comicbot:latest .`
+1. Push the image to the repository `docker push <repository>/comicbot:latest`

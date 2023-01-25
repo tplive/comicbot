@@ -1,6 +1,6 @@
 
 ### Build ###
-FROM golang:1.17.1-alpine3.14 AS build
+FROM golang:1.19.5-alpine3.17 AS build
 
 WORKDIR /app
 
@@ -14,12 +14,10 @@ RUN go build -o /comicbot
 
 ### Deploy
 
-FROM gcr.io/distroless/base-debian10
+FROM alpine
 
 WORKDIR /
 
 COPY --from=build /comicbot /comicbot
-
-USER nonroot:nonroot
 
 ENTRYPOINT ["/comicbot"]
