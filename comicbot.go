@@ -84,7 +84,7 @@ func SendSlackNotification(webhookUrl string, msg string) error {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(resp.Body)
 	if buf.String() != "ok" {
-		return errors.New("Non-ok response returned from Slack")
+		return errors.New("non-ok response returned from slack")
 	}
 	return nil
 }
@@ -101,7 +101,7 @@ func getComic(comic string) (string, string) {
 
 	fileName := "tu-" + comicId + "-" + date + ".jpg"
 	URL := baseUrl + "/?module=TekComics&service=image&id=" + comicId + "&key=" + date
-	// URL looks like this https://www.tu.no/?module=TekComics&service=image&id=lunch&key=2020-05-28
+	// URL looks like this https://www.tu.no/modules/?module=TekComics&service=image&id=lunch&key=2020-05-28
 
 	return fileName, URL
 }
