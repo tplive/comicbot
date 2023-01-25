@@ -15,6 +15,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
+const baseUrl string = "https://tu.no/modules"
+
 type SlackRequestBody struct {
 	Text string `json:"text"`
 }
@@ -88,7 +90,6 @@ func SendSlackNotification(webhookUrl string, msg string) error {
 }
 
 func getComic(comic string) (string, string) {
-	baseUrl := "https://tu.no"
 	date := time.Now().Format("2006-01-02")
 
 	var comicId string
