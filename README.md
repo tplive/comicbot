@@ -22,6 +22,10 @@ WEBHOOK_URL="https://hooks.slack.com/services/THIS/IS/PRIVATE"
 
 This will download todays cartoon, if there is one, or fail gracefully otherwise.
 
+## Building the executable
+
+1. Build executable file with `go build comicbot.go -o build/`.
+
 ## Building and running with Docker
 
 1. Build the image `docker build --tag comicbot .`
