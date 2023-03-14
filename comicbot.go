@@ -15,7 +15,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const baseUrl string = "https://tu.no/modules"
+const baseUrl string = "https://tu.no/api/widgets"
+const oldBaseUrl string = "https://tu.no/modules"
 
 type SlackRequestBody struct {
 	Text string `json:"text"`
@@ -29,6 +30,7 @@ func main() {
 	}
 
 	lunch, LUrl := getComic("lunch")
+	dunce, DuUrl := getComic("dunce")
 	dilbert, DUrl := getComic("dilbert")
 
 	LNotErr := SendSlackNotification(webHookUrl, "Dagens Lunch "+LUrl)
@@ -41,14 +43,24 @@ func main() {
 		log.Fatal(DNotErr)
 	}
 
+	DuNotErr := SendSlackNotification(webHookUrl, "Dagens Dunce "+DuUrl)
+	if DuNotErr != nil {
+		log.Fatal(DuNotErr)
+	}
+
 	LFileErr := downloadFile(LUrl, lunch)
 	if LFileErr != nil {
 		log.Fatal(LFileErr)
 	}
 
+	DuFileErr := downloadFile(DuUrl, dunce)
+	if DuFileErr != nil {
+		log.Fatal(DuFileErr)
+	}
+
 	DFileErr := downloadFile(DUrl, dilbert)
 	if DFileErr != nil {
-		log.Fatal(DFileErr)
+		log.Default()
 	}
 
 }
@@ -92,16 +104,22 @@ func SendSlackNotification(webhookUrl string, msg string) error {
 func getComic(comic string) (string, string) {
 	date := time.Now().Format("2006-01-02")
 
-	var comicId string
-	if comic == "lunch" || comic == "dilbert" {
-		comicId = comic
+	var URL string
+	// The old base URL looks like this https://www.tu.no/modules/?module=TekComics&service=image&id=dilbert&key=2020-05-28 and is still used for Dilbert
+	// The new format introduced in March 2023 looks like this https://www.tu.no/api/widgets/comics?name=lunch&date=2023-03-14 and is used for Lunch and Dunce
+
+	if comic == "dilbert" {
+
+		URL = oldBaseUrl + "/?module=TekComics&service=image&id=" + comic + "&key=" + date
+	} else if comic == "lunch" || comic == "dunce" {
+		URL = baseUrl + "/comics?name=" + comic + "&date=" + date
 	} else {
-		comicId = "unknown"
+		URL = oldBaseUrl + "/?module=TekComics&service=image&id=" + comic + "&key=" + date
 	}
 
-	fileName := "tu-" + comicId + "-" + date + ".jpg"
-	URL := baseUrl + "/?module=TekComics&service=image&id=" + comicId + "&key=" + date
-	// URL looks like this https://www.tu.no/modules/?module=TekComics&service=image&id=lunch&key=2020-05-28
+	fileName := "tu-" + comic + "-" + date + ".jpg"
+
+	println(URL)
 
 	return fileName, URL
 }
