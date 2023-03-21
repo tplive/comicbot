@@ -1,12 +1,14 @@
 # Comicbot!
 
-Go program that goes out to the [Teknisk Ukeblad web](https://tu.no) and downloads todays Lunch and Dilbert cartoons, then sends the URL to your Slack channel. The cartoons are in Norwegian.
+Go program that goes out to the [Teknisk Ukeblad web](https://tu.no) and downloads todays Lunch and Dunce cartoons, and Dilbert - while supplies last[1] - then sends the URL to your Slack channel. The cartoons are in Norwegian.
 
 Could evolve to get other comics as well? :)
 
 The original idea is mine, but I have used various resources in implementing the solution. Learning Go along the way.
 
 You should probably avoid spamming the tu.no website, as they might react with breaking changes.
+
+[1] Dilbert was cancelled following the Scott Adams controversy.
 
 ## Prerequisites
 
@@ -18,9 +20,9 @@ You should probably avoid spamming the tu.no website, as they might react with b
 WEBHOOK_URL="https://hooks.slack.com/services/THIS/IS/PRIVATE"
 ```
 
-3. Run the bot with `go run comicbot.go`
+3. Run the bot with `go run comicbot.go functions.go`
 
-This will download todays cartoon, if there is one, or fail gracefully otherwise.
+This will download todays cartoons, if there is one, or fail gracefully otherwise.
 
 ## Building and running with Docker
 
