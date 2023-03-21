@@ -27,12 +27,19 @@ func main() {
 		"dunce",
 	}
 
+	getComics(tuComix, webHookUrl)
+
+	getXKCD()
+
+}
+
+func getComics(comics []string, webhook string) {
 	// Iterate over the comics
-	for _, comic := range tuComix {
+	for _, comic := range comics {
 		fileName, url := getTekniskUkebladComic(comic)
 
 		// Post comic to Slack
-		notErr := sendSlackNotification(webHookUrl, "Dagens "+toUpper(comic)+" "+url)
+		notErr := sendSlackNotification(webhook, "Dagens "+toUpper(comic)+" "+url)
 		if notErr != nil {
 			log.Fatal(notErr)
 		}
