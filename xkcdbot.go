@@ -12,8 +12,6 @@ import (
 
 const url string = "https://xkcd.com"
 const counterApiUrl string = "https://kvdb.io"
-const counterApiBucket string = "32FZdnyZxxV3Rm7VWqRWH4"
-const endpoint string = counterApiUrl + "/" + counterApiBucket + "/xkcd"
 
 type XKCDComic struct {
 	Month      string `json:"month"`
@@ -31,25 +29,28 @@ type XKCDComic struct {
 
 func getXKCD() {
 
-	// Get metadata for the latest posted XKCD comic strip. -1 means "get latest"
-	latestComicMetadata := getComicMetadata(-1)
-
-	// Get the index of the last comic we downloaded.
-	previousComic := getLastComicIndex(counterApiUrl, counterApiBucket)
-	var lastComic int
-	lastComic = previousComic
-
 	// Get Slack URL for posting
 	webHookUrl := getEnvVar("WEBHOOK_URL")
 	if webHookUrl == "" {
 		log.Fatal("No such environment variable WEBHOOK_URL")
 	}
 
-	// Sort of a while loop - if there are newer comic(s) since last update, we should get'em all
-	for latestComicMetadata.Num > previousComic {
+	counterApiBucket := getEnvVar("KVDB_BUCKET")
+	if webHookUrl == "" {
+		log.Fatal("No such environment variable WEBHOOK_URL")
+	}
 
-		// We need to know the last comic we downloaded
-		nextComic := getComicMetadata(previousComic)
+	endpoint := counterApiUrl + "/" + counterApiBucket + "/xkcd"
+
+	// Get metadata for the latest posted XKCD comic strip. -1 means "get latest"
+	latestComicMetadata := getComicMetadata(-1)
+
+	lastComicIndex := getLastComicIndex(endpoint)
+
+	// Sort of a while loop - if there are newer comic(s) since last update, we should get'em all
+	for latestComicMetadata.Num > lastComicIndex {
+
+		nextComic := getComicMetadata(lastComicIndex + 1)
 		var err error
 
 		sendSlackNotification(webHookUrl, "Siste XKCD "+nextComic.Img)
@@ -57,47 +58,52 @@ func getXKCD() {
 		fileName := fmt.Sprintf("xkcd-%d.png", nextComic.Num)
 		err = downloadFileFromUrl(nextComic.Img, fileName)
 		if err == nil {
-			previousComic++
+			lastComicIndex++
+			incrementComicIndex(endpoint)
 		} else {
 			break
 		}
 
 		// Break out of the loop once we have downloaded the latest comic
-		if latestComicMetadata.Num == previousComic {
-			setComicIndex(latestComicMetadata.Num)
+		if latestComicMetadata.Num == lastComicIndex {
 			break
 		}
 	}
 }
 
-func incrementComicIndex() {
+func incrementComicIndex(url string) {
 	client := &http.Client{}
 
 	payload := []byte("+1")
 
-	req, _ := http.NewRequest(http.MethodPatch, endpoint, bytes.NewBuffer(payload))
+	req, _ := http.NewRequest(http.MethodPatch, url, bytes.NewBuffer(payload))
 	req.Header.Set("Content-Type", "application/json")
-	resp, _ := client.Do(req)
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal("An error occurred incrementing comic index!")
+	}
 
 	defer resp.Body.Close()
 }
 
-func setComicIndex(value int) {
+func setComicIndex(value int, url string) {
 	client := &http.Client{}
 
 	payload := []byte(fmt.Sprint(value))
 
-	req, _ := http.NewRequest(http.MethodPost, endpoint, bytes.NewBuffer(payload))
+	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(payload))
 	req.Header.Set("Content-Type", "application/json")
-	resp, _ := client.Do(req)
-
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal("An error occurred setting comic index!")
+	}
 	defer resp.Body.Close()
 }
 
-func getLastComicIndex(url string, bucket string) int {
+func getLastComicIndex(url string) int {
 
 	// GET kvdb.io/bucket/key
-	response, apiError := http.Get(counterApiUrl + "/" + bucket + "/xkcd")
+	response, apiError := http.Get(url)
 
 	if apiError != nil {
 		log.Fatal(apiError)
