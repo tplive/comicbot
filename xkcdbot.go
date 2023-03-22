@@ -31,38 +31,63 @@ type XKCDComic struct {
 
 func getXKCD() {
 
-	// Pseudo code:
+	// Get metadata for the latest posted XKCD comic strip. -1 means "get latest"
+	latestComicMetadata := getComicMetadata(-1)
 
-	// 1. Get info from latest comic.
-	// 2. Get the index of the last downloaded comic from persistence layer.
-	// 3. If there is a new comic, get it.
-	// 4. Post to Slack
-	// 5. Download image file
-	// 6. If successful, increment index in persistence layer.
+	// Get the index of the last comic we downloaded.
+	previousComic := getLastComicIndex(counterApiUrl, counterApiBucket)
+	var lastComic int
+	lastComic = previousComic
 
-	data := getLatestComicMetadata()
-	lastComic := getLastComicIndex(counterApiUrl, counterApiBucket)
+	// Get Slack URL for posting
+	webHookUrl := getEnvVar("WEBHOOK_URL")
+	if webHookUrl == "" {
+		log.Fatal("No such environment variable WEBHOOK_URL")
+	}
 
-	if data.Num > lastComic {
-		// There are newer comic(s), so we should get'em
-		fmt.Printf("Url for the \"next\" comic: %s\n", data.Img)
-		fileName := fmt.Sprintf("xkcd-%d.png", data.Num)
-		err := downloadFileFromUrl(data.Img, fileName)
+	// Sort of a while loop - if there are newer comic(s) since last update, we should get'em all
+	for latestComicMetadata.Num > previousComic {
+
+		// We need to know the last comic we downloaded
+		nextComic := getComicMetadata(previousComic)
+		var err error
+
+		sendSlackNotification(webHookUrl, "Siste XKCD "+nextComic.Img)
+
+		fileName := fmt.Sprintf("xkcd-%d.png", nextComic.Num)
+		err = downloadFileFromUrl(nextComic.Img, fileName)
 		if err == nil {
-			incrementComicIndex(data.Num)
+			previousComic++
+		} else {
+			break
 		}
 
+		// Break out of the loop once we have downloaded the latest comic
+		if latestComicMetadata.Num == previousComic {
+			setComicIndex(latestComicMetadata.Num)
+			break
+		}
 	}
-	fmt.Printf("Current comic: %d\n", data.Num)
-	fmt.Printf("Last fetched comic: %d\n", lastComic)
 }
 
-func incrementComicIndex(i int) {
+func incrementComicIndex() {
 	client := &http.Client{}
 
 	payload := []byte("+1")
 
 	req, _ := http.NewRequest(http.MethodPatch, endpoint, bytes.NewBuffer(payload))
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := client.Do(req)
+
+	defer resp.Body.Close()
+}
+
+func setComicIndex(value int) {
+	client := &http.Client{}
+
+	payload := []byte(fmt.Sprint(value))
+
+	req, _ := http.NewRequest(http.MethodPost, endpoint, bytes.NewBuffer(payload))
 	req.Header.Set("Content-Type", "application/json")
 	resp, _ := client.Do(req)
 
@@ -92,13 +117,20 @@ func getLastComicIndex(url string, bucket string) int {
 	return latestComic
 }
 
-func getLatestComicMetadata() XKCDComic {
+func getComicMetadata(comicNumber int) XKCDComic {
 
-	// Current comic: https://xkcd.com/info.0.json
 	// Arbitrary comic: https://xkcd.com/{comicIndex}/info.0.json where comicIndex is 1..N
-	currentComicUrl := "https://xkcd.com/info.0.json"
+	// Latest published comic: https://xkcd.com/info.0.json
+	// If comicNumber is set to a positive integer, it means we want one particular comic. If not, get the latest one.
 
-	response, apiError := http.Get(currentComicUrl)
+	var comicUrl string
+	if comicNumber > 0 {
+		comicUrl = fmt.Sprintf("https://xkcd.com/%d/info.0.json", comicNumber)
+	} else {
+		comicUrl = "https://xkcd.com/info.0.json"
+	}
+
+	response, apiError := http.Get(comicUrl)
 
 	if apiError != nil {
 		log.Fatal(apiError)
@@ -115,12 +147,7 @@ func getLatestComicMetadata() XKCDComic {
 		panic(err.Error())
 	}
 
-	//fmt.Printf("Results: %v\n", comicMetadata)
-	//fmt.Println(comicMetadata.Num)
-	//fmt.Println(comicMetadata.SafeTitle)
-
 	return comicMetadata
-
 }
 
 func XKCDCreate(w http.ResponseWriter, r *http.Request) {
