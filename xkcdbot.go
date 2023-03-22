@@ -60,9 +60,11 @@ func getXKCD() {
 func incrementComicIndex(i int) {
 	client := &http.Client{}
 
-	req, err := http.NewRequest(http.MethodPatch, endpoint, bytes.NewBuffer(json.Marshal("+1")))
+	payload := []byte("+1")
+
+	req, _ := http.NewRequest(http.MethodPatch, endpoint, bytes.NewBuffer(payload))
 	req.Header.Set("Content-Type", "application/json")
-	resp, err := client.Do(req)
+	resp, _ := client.Do(req)
 
 	defer resp.Body.Close()
 }
