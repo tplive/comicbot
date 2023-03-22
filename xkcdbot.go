@@ -27,13 +27,7 @@ type XKCDComic struct {
 	Day        string `json:"day"`
 }
 
-func getXKCD() {
-
-	// Get Slack URL for posting
-	webHookUrl := getEnvVar("WEBHOOK_URL")
-	if webHookUrl == "" {
-		log.Fatal("No such environment variable WEBHOOK_URL")
-	}
+func getXKCD(webHookUrl string) {
 
 	counterApiBucket := getEnvVar("KVDB_BUCKET")
 	if webHookUrl == "" {

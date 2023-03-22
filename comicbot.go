@@ -20,16 +20,9 @@ func main() {
 		log.Fatal("No such environment variable WEBHOOK_URL")
 	}
 
-	// List comics from Teknisk Ukeblad
-	tuComix := []string{
-		"lunch",
-		"dilbert",
-		"dunce",
-	}
+	getComics([]string{"lunch", "dilbert", "dunce"}, webHookUrl)
 
-	getComics(tuComix, webHookUrl)
-
-	getXKCD()
+	getXKCD(webHookUrl)
 
 }
 
