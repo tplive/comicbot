@@ -28,7 +28,7 @@ KVDB_BUCKET="yourBucketId"
    ```
 6. Run the bot with `go run .`
 
-This should download the images of the current comics to `pwd`, and post their URL's to Slack.
+This should download the images of the current comics to `pwd`, and post their URLs to Slack.
 
 ## Building and running with Docker
 
