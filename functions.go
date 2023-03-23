@@ -101,7 +101,7 @@ func sendSlackNotification(webhookUrl string, msg string) error {
 	return nil
 }
 
-func toUpper(s string) string {
+func capitalize(s string) string {
 	sep := " "
 	ss := strings.SplitN(s, sep, 2)
 	r := []rune(ss[0])

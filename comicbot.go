@@ -32,7 +32,7 @@ func getComics(comics []string, webhook string) {
 		fileName, url := getTekniskUkebladComic(comic)
 
 		// Post comic to Slack
-		notErr := sendSlackNotification(webhook, "Dagens "+toUpper(comic)+" "+url)
+		notErr := sendSlackNotification(webhook, "Dagens "+capitalize(comic)+" "+url)
 		if notErr != nil {
 			log.Fatal(notErr)
 		}
