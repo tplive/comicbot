@@ -10,9 +10,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 	"time"
-	"unicode"
 
 	"github.com/joho/godotenv"
 )
@@ -99,19 +97,4 @@ func sendSlackNotification(webhookUrl string, msg string) error {
 		return errors.New("non-ok response returned from slack")
 	}
 	return nil
-}
-
-func capitalize(s string) string {
-	sep := " "
-	ss := strings.SplitN(s, sep, 2)
-	r := []rune(ss[0])
-	if len(r) == 0 {
-		return s
-	}
-	r[0] = unicode.ToUpper(r[0])
-	s = string(r)
-	if len(ss) > 1 {
-		s += sep + ss[1]
-	}
-	return s
 }
