@@ -111,6 +111,7 @@ func getLastComicIndex(url string) int {
 	err = json.Unmarshal(body, &latestComic)
 
 	if err != nil {
+		println("There was an error getting the index, does the key actually exist?")
 		panic(err.Error())
 	}
 
