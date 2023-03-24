@@ -1,26 +1,34 @@
 # Comicbot!
 
-Go program that goes out to the [Teknisk Ukeblad web](https://tu.no) and downloads todays Lunch and Dilbert cartoons, then sends the URL to your Slack channel. The cartoons are in Norwegian.
+Go program that goes out to the [Teknisk Ukeblad web](https://tu.no) and downloads todays Lunch and Dunce cartoons, and Dilbert - while supplies last[1] - then sends the URL to your Slack channel. The cartoons are in Norwegian.
 
-Could evolve to get other comics as well? :)
+New! Also supports downloading XKCD - will use a key/value pair at [kvdb.io](https://kvdb.io/) to track the last comic that was downloaded, and only download newer ones.
 
 The original idea is mine, but I have used various resources in implementing the solution. Learning Go along the way.
 
 You should probably avoid spamming the tu.no website, as they might react with breaking changes.
 
+[1] Dilbert was cancelled following the Scott Adams controversy.
+
 ## Prerequisites
 
 1. Get your Slack Incoming Webhook URL set up.
-1. Install Golang
-1. Set environment variable as below, or in a `.env` file for automatic inclusion:
+2. Set up your kvdb.io bucket, ie like this `curl -d 'email=user@example.com' https://kvdb.io`
+3. Install Golang. Or just run the bot in a Github workflow. See `.github/workflows` for examples.
+4. Set environment variable as below, or in a `.env` file for automatic inclusion:
 
 ```bash
 WEBHOOK_URL="https://hooks.slack.com/services/THIS/IS/PRIVATE"
+KVDB_BUCKET="yourBucketId"
 ```
 
-3. Run the bot with `go run comicbot.go`
+5. Set a key in your KVDB bucket to the comic id of the XKCD comic you want to start tracking from. As of this writing the current comic is 2752.
+   ```bash
+   curl https://kvdb.io/yourBucketId/xkcd -d '2752'
+   ```
+6. Run the bot with `go run .`
 
-This will download todays cartoon, if there is one, or fail gracefully otherwise.
+This should download the images of the current comics to `pwd`, and post their URLs to Slack.
 
 ## Building and running with Docker
 

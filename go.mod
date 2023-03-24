@@ -1,5 +1,5 @@
-module qvidahl.no/thomas/lunchbot
+module qvidahl.no/thomas/comicbot
 
-go 1.16
+go 1.20
 
-require github.com/joho/godotenv v1.3.0
+require github.com/joho/godotenv v1.5.1

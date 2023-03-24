@@ -1,22 +1,13 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"io"
 	"log"
-	"net/http"
-	"os"
-	"strconv"
+	"strings"
 	"time"
-
-	"github.com/joho/godotenv"
 )
 
-const baseUrl string = "https://tu.no/api/widgets"
-const oldBaseUrl string = "https://tu.no/modules"
+const baseUrl string = "https://tu.no/api/widgets/comics?name="
+const oldBaseUrl string = "https://tu.no/modules/?module=TekComics&service=image&id="
 
 type SlackRequestBody struct {
 	Text string `json:"text"`
@@ -24,84 +15,39 @@ type SlackRequestBody struct {
 
 func main() {
 
-	webHookUrl := getEnvironment("WEBHOOK_URL")
+	// Setup
+	webHookUrl := getEnvVar("WEBHOOK_URL")
 	if webHookUrl == "" {
-		log.Fatal("No string")
+		log.Fatal("No such environment variable WEBHOOK_URL")
 	}
 
-	lunch, LUrl := getComic("lunch")
-	dunce, DuUrl := getComic("dunce")
-	dilbert, DUrl := getComic("dilbert")
+	getComics([]string{"lunch", "dilbert", "dunce"}, webHookUrl)
 
-	LNotErr := SendSlackNotification(webHookUrl, "Dagens Lunch "+LUrl)
-	if LNotErr != nil {
-		log.Fatal(LNotErr)
-	}
-
-	DNotErr := SendSlackNotification(webHookUrl, "Dagens Dilbert "+DUrl)
-	if DNotErr != nil {
-		log.Fatal(DNotErr)
-	}
-
-	DuNotErr := SendSlackNotification(webHookUrl, "Dagens Dunce "+DuUrl)
-	if DuNotErr != nil {
-		log.Fatal(DuNotErr)
-	}
-
-	LFileErr := downloadFile(LUrl, lunch)
-	if LFileErr != nil {
-		log.Fatal(LFileErr)
-	}
-
-	DuFileErr := downloadFile(DuUrl, dunce)
-	if DuFileErr != nil {
-		log.Fatal(DuFileErr)
-	}
-
-	DFileErr := downloadFile(DUrl, dilbert)
-	if DFileErr != nil {
-		log.Default()
-	}
+	getXKCD(webHookUrl)
 
 }
 
-func getEnvironment(varName string) string {
+func getComics(comics []string, webhook string) {
+	// Iterate over the comics
+	for _, comic := range comics {
+		fileName, url := getTekniskUkebladComic(comic)
 
-	godotenv.Load(".env")
+		// Post comic to Slack
+		notErr := sendSlackNotification(webhook, "Dagens "+strings.Title(comic)+" "+url)
+		if notErr != nil {
+			log.Fatal(notErr)
+		}
 
-	value, isSet := os.LookupEnv(varName)
+		// Download image
+		fileErr := downloadFileFromUrl(url, fileName)
+		if fileErr != nil {
+			log.Fatal(fileErr)
+		}
 
-	if !isSet || value == "" {
-		log.Print("Must set environment variable " + varName)
 	}
-	return value
 }
 
-func SendSlackNotification(webhookUrl string, msg string) error {
-
-	slackBody, _ := json.Marshal(SlackRequestBody{Text: msg})
-	req, err := http.NewRequest(http.MethodPost, webhookUrl, bytes.NewBuffer(slackBody))
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("Content-Type", "application/json")
-
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(resp.Body)
-	if buf.String() != "ok" {
-		return errors.New("non-ok response returned from slack")
-	}
-	return nil
-}
-
-func getComic(comic string) (string, string) {
+func getTekniskUkebladComic(comic string) (string, string) {
 	date := time.Now().Format("2006-01-02")
 
 	var URL string
@@ -110,11 +56,11 @@ func getComic(comic string) (string, string) {
 
 	if comic == "dilbert" {
 
-		URL = oldBaseUrl + "/?module=TekComics&service=image&id=" + comic + "&key=" + date
+		URL = oldBaseUrl + comic + "&key=" + date
 	} else if comic == "lunch" || comic == "dunce" {
-		URL = baseUrl + "/comics?name=" + comic + "&date=" + date
+		URL = baseUrl + comic + "&date=" + date
 	} else {
-		URL = oldBaseUrl + "/?module=TekComics&service=image&id=" + comic + "&key=" + date
+		URL = oldBaseUrl + comic + "&key=" + date
 	}
 
 	fileName := "tu-" + comic + "-" + date + ".jpg"
@@ -122,33 +68,4 @@ func getComic(comic string) (string, string) {
 	println(URL)
 
 	return fileName, URL
-}
-
-func downloadFile(URL, fileName string) error {
-	// Get response bytes from url
-	response, err := http.Get(URL)
-	if err != nil {
-		return err
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode != 200 {
-		return errors.New("Received non 200 response code: " + strconv.Itoa(response.StatusCode))
-
-	}
-
-	// Create an empty file
-	file, err := os.Create(fileName)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	// Write bytes to file
-	_, err = io.Copy(file, response.Body)
-	if err != nil {
-		return err
-	}
-	fmt.Printf("File %s downloaded in current working directory\n", fileName)
-	return nil
 }
