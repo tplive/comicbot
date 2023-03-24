@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/golang/gddo/httputil/header"
+	"qvidahl.no/thomas/comicbot/header"
 )
 
 type malformedRequest struct {
@@ -22,6 +22,7 @@ func (mr *malformedRequest) Error() string {
 
 func decodeJSONBody(w http.ResponseWriter, r *http.Request, dst interface{}) error {
 	if r.Header.Get("Content-Type") != "" {
+
 		value, _ := header.ParseValueAndParams(r.Header, "Content-Type")
 		if value != "application/json" {
 			msg := "Content-Type header is not application/json"
