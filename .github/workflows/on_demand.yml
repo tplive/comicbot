@@ -15,11 +15,13 @@ jobs:
       WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
     steps:
     - uses: actions/checkout@v3
+      with:
+        ref: '7338dba4484869cc029f4f03ca61b9982a770028' # Checkout previous version supporting Dunce
     - name: Set up Go
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v4
       with:
         go-version: 1.20
-    - name: Install 3rd party dependencies
-      run: go get
+    - name: Install dependencies
+      run: go get .
     - name: Run
-      run: go run comicbot.go functions.go
+      run: go run comicbot.go
